@@ -1,5 +1,7 @@
 # Shady Logs
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/shadiestgoat/log.svg)](https://pkg.go.dev/github.com/shadiestgoat/log)
+
 This is a *highly* opinionated yet expandable logger. The main focus of this logger is easy of use, which is why this does not have logger instances, but rather a global logger (all of which log to the same set of outputs).
 
 To get started, you have to initialize the logger along with the desired outputs:
