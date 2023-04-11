@@ -50,6 +50,8 @@ var levelInfo = map[LogLevel]logLevelInfo{
 	},
 }
 
+var gonnaPanic = false
+
 func log(level LogLevel, msg string, args ...any) {
 	levelInfo := levelInfo[level]
 
@@ -63,19 +65,34 @@ func log(level LogLevel, msg string, args ...any) {
 
 	for _, l := range loggers {
 		go func(l DoLog) {
+			lvl := level
+
 			for !ready {
 				time.Sleep(200 * time.Millisecond)
 			}
-			l(level, prefix, msg)
+
+			l(lvl, prefix, msg)
 			wg.Done()
 		}(l)
 	}
 
-	wg.Wait()
-
 	if level == LL_FATAL {
-		panic(msg)
+
+		// Don't panic in case of race conditions!
+		if gonnaPanic {
+			level = LL_ERROR
+		}
+
+		gonnaPanic = true
 	}
+
+	go func() {
+		wg.Wait()
+		
+		if level == LL_FATAL {
+			panic(msg)
+		}
+	}()
 }
 
 func Debug(msg string, args ...any) {
