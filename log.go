@@ -72,6 +72,10 @@ func log(level LogLevel, msg string, args ...any) {
 	}
 
 	wg.Wait()
+
+	if level == LL_FATAL {
+		panic(msg)
+	}
 }
 
 func Debug(msg string, args ...any) {
@@ -93,7 +97,6 @@ func Error(msg string, args ...any) {
 // Warning! This function causes panic! 
 func Fatal(msg string, args ...any) {
 	log(LL_FATAL, msg, args...)
-	panic(msg)
 }
 
 // "While {CONTEXT}: {ERROR}"
