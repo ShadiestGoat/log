@@ -16,10 +16,6 @@ var closers = []func (){}
 var ready bool
 
 func Init(callbacks ...LogCB) {
-	if len(callbacks) == 0 {
-		panic("No callbacks for logger")
-	}
-
 	for _, cb := range callbacks {
 		l, c := cb()
 		loggers = append(loggers, l)
