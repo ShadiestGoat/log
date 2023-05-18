@@ -121,9 +121,8 @@ func NewLoggerFileComplex(fileName string, mode FileInitorMode, maxNumber int) (
 			for _, n := range names[maxNumber:] {
 				os.Remove(fileNameGen(fileName, n))
 			}
+			names = names[:maxNumber]
 		}
-
-		names = names[:maxNumber]
 
 		for _, n := range names {
 			os.Rename(fileNameGen(fileName, n), fileNameGen(fileName, n + 1))
