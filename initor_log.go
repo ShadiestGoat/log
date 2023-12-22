@@ -5,7 +5,7 @@ package log
 func NewLoggerPrint() LogCB {
 	return func() (logger DoLog, closer Closer) {
 		logger = func (lvl LogLevel, prefix, msg string) {
-			GetColor(lvl).Println(prefix, msg)
+			GetColor(lvl).Println(prefix + " " + msg)
 		}
 		return
 	}
