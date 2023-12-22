@@ -59,12 +59,7 @@ func theNames(dir, name string) []int {
 }
 
 func makeNeededDirs(cwd, localPath string) {
-	dir := filepath.Dir(localPath)
-	if dir == "." {
-		return
-	}
-
-	path := strings.Split(dir, string(filepath.Separator))
+	path := strings.Split(localPath, string(filepath.Separator))
 
 	for i := range path {
 		fullPath := filepath.Join(append([]string{cwd}, path[:i+1]...)...)
@@ -106,7 +101,7 @@ func NewLoggerFileComplex(fileName string, mode FileInitorMode, maxNumber int) (
 	}
 	
 	// This logic is a bit over-engineered, but the idea is that we only want to make folders if they are relative.
-	absPath, err := filepath.Abs(fileName)
+	absPath, err := filepath.Abs(filepath.Dir(fileName))
 	if err != nil {
 		panic("Couldn't resolve path: " + err.Error())
 	}
