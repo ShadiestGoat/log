@@ -1,9 +1,11 @@
 package log
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -56,6 +58,37 @@ func theNames(dir, name string) []int {
 	return names
 }
 
+func makeNeededDirs(cwd, localPath string) {
+	dir := filepath.Dir(localPath)
+	if dir == "." {
+		return
+	}
+
+	path := strings.Split(dir, string(filepath.Separator))
+
+	for i := range path {
+		fullPath := filepath.Join(append([]string{cwd}, path[:i+1]...)...)
+
+		stat, err := os.Stat(fullPath)
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				err := os.Mkdir(fullPath, 0755)
+				if err != nil {
+					panic("Can't make path: " + err.Error())
+				}
+
+				continue
+			}
+
+			panic("Can't stat path: " + err.Error())
+		}
+		
+		if !stat.IsDir() {
+			panic("Can't make path: '" + fullPath + "' isn't a directory (its a file!)")
+		}
+	}
+}
+
 // maxNumber must be either >= 0. 
 // maxNumber indicates the max amount of files that can be stored. 0 indicates that an infinite amount of files can be stored.
 // if mode == FILE_OVERWRITE, maxNumber is ignored.
@@ -70,6 +103,30 @@ func NewLoggerFileComplex(fileName string, mode FileInitorMode, maxNumber int) (
 
 	if fileName[len(fileName)-1] == '/' {
 		panic("fileName must be a file for the file logger!")
+	}
+	
+	// This logic is a bit over-engineered, but the idea is that we only want to make folders if they are relative.
+	absPath, err := filepath.Abs(fileName)
+	if err != nil {
+		panic("Couldn't resolve path: " + err.Error())
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic("Couldn't get cwd: " + err.Error())
+	}
+
+	cwd, err = filepath.EvalSymlinks(cwd)
+	if err != nil {
+		panic("Couldn't resolve cwd: " + err.Error())
+	}
+	absPath, err = filepath.EvalSymlinks(absPath)
+	if err != nil {
+		panic("Couldn't resolve abs path: " + err.Error())
+	}
+
+	if localPath, found := strings.CutPrefix(absPath, cwd + "/"); found {
+		makeNeededDirs(cwd, localPath)
 	}
 
 	info, err := os.Stat(fileName)
