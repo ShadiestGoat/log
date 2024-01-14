@@ -19,11 +19,11 @@ func NewLoggerDiscordWebhook(cPrefix, webhook string) LogCB {
 			if cPrefix != "" {
 				content = cPrefix + " " + content
 			}
-	
+
 			buf, _ := json.Marshal(discordWebhook{
 				Content: content,
 			})
-	
+
 			http.Post(webhook, "application/json", bytes.NewReader(buf))
 		}
 
